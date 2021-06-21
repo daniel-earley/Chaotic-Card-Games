@@ -1,0 +1,6 @@
+#out files
+out
+*.class
+
+#Idea
+.idea
