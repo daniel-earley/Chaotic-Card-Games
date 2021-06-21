@@ -1,6 +1,13 @@
-#out files
+#Out files
 out
 *.class
+
+#Gradle
+.gradle
+settings.gradle
+gradle
+gradlew
+gradlew.bat
 
 #Idea
 .idea
