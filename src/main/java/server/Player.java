@@ -16,11 +16,6 @@ public class Player {
     private final BufferedReader in;
     private final PrintWriter out;
 
-//    public Player(String username) {
-//        this.username = username;
-//        this.hand = new Deck();
-//    }
-
     // Constructor
     public Player(Socket socket) throws IOException{
         // Setup output streams
