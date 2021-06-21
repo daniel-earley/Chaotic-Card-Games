@@ -1,21 +1,53 @@
 package server;
 
+import java.io.*;
+import java.net.Socket;
 import java.util.List;
 
 public class Player {
-    private String name;
+    // Player Properties
+    private String username;
     protected Deck hand;
     private boolean turn = false;
 
-    public Player(String name) {
-        this.name = name;
-        this.hand = new Deck();
+    // Connection Info
+    public CCGServerThread ccgServerThread;
+    private final Socket socket;
+    private final BufferedReader in;
+    private final PrintWriter out;
+
+//    public Player(String username) {
+//        this.username = username;
+//        this.hand = new Deck();
+//    }
+
+    // Constructor
+    public Player(Socket socket) throws IOException{
+        // Setup output streams
+        this.out = new PrintWriter(socket.getOutputStream(), true);
+        this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+
+        // Start listener thread
+        this.ccgServerThread = new CCGServerThread(this);
+        this.socket = socket;
     }
+
+    // Communication Functions
+
+    public synchronized void sendPlayerNames(List<Player> newPlayers) {
+        StringBuilder msg = new StringBuilder("PLAYERNAMES ");
+        for (Player player: newPlayers) {
+            msg.append(player.getUsername()).append(" ");
+        }
+        out.println(msg);
+    }
+
+    // Game Functions
 
     public Card play(int index) {
         setTurn(false);
         Card card = hand.popCard(index);
-        System.out.printf("%s played %s\n", getName(), card);
+        System.out.printf("%s played %s\n", getUsername(), card);
         return card;
     }
 
@@ -25,15 +57,16 @@ public class Player {
     }
 
     public void pickup(Card card){
-        System.out.printf("%s picked up a card\n", getName());
+        System.out.printf("%s picked up a card\n", getUsername());
         this.hand.pickup(card);
     }
 
-    public String getName(){
-        return this.name;
+    // Getters and Setters
+    public String getUsername(){
+        return this.username;
     }
 
-    public void setName(String name){ this.name = name; }
+    public void setUsername(String username){ this.username = username; }
 
     public boolean getTurn() {
         return this.turn;
@@ -52,11 +85,16 @@ public class Player {
     }
 
     public String toString() {
-        return "\n" + getName() + ":\np: Pickup a Card\n" + hand.toString();
+        return "\n" + getUsername() + ":\np: Pickup a Card\n" + hand.toString();
     }
 
     public String toStringAlt(){
-        return "\n" + getName() + ":\ne: End Turn\n" + hand.toString();
+        return "\n" + getUsername() + ":\ne: End Turn\n" + hand.toString();
     }
 
+    public BufferedReader getNetworkReader() { return in; }
+
+    public PrintWriter getNetworkWriter() { return out; }
+
+    public Socket getSocket() { return socket; }
 }
